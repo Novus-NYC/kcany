@@ -2,11 +2,274 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  padding: 0;
-  margin: 0;
+/* ---------- Tokens ----------
+   Art direction: "night over Flushing". Ink-navy ground, hanji paper for reading,
+   flag red as the action color (red appears in all three flags), brass and azure as accents. */
+:root {
+  --ink: #0b1220;
+  --ink-2: #131d33;
+  --hanji: #f3ede0;
+  --hanji-2: #e8e0cd;
+  --flag: #c8352b;
+  --flag-hover: #e04535;
+  --brass: #dca848;
+  --azure: #34569f;
+  --azure-lt: #8fb0f0;
+  --mute: #a9b2c6; /* muted text on ink */
+  --mute-ink: #5a5548; /* muted text on hanji */
+  --line-ink: rgba(243, 237, 224, 0.16);
+  --line-hanji: rgba(11, 18, 32, 0.18);
+  --nav-h: 4.25rem;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --ease: cubic-bezier(0.22, 0.8, 0.2, 1);
 }
 
-* {
-  box-sizing: border-box;
+html {
+  scroll-padding-top: calc(var(--nav-h) + 1rem);
+  background: var(--ink);
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--hanji);
+  color: var(--ink);
+  font-family: var(--font-text), system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+img { max-width: 100%; height: auto; }
+
+:focus-visible {
+  outline: 3px solid var(--brass);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.font-display { letter-spacing: -0.035em; line-height: 1.12; }
+
+.skip-link {
+  position: fixed; left: 1rem; top: -4rem; z-index: 100;
+  background: var(--brass); color: var(--ink); padding: 0.6rem 1rem; font-weight: 700;
+}
+.skip-link:focus { top: 1rem; }
+
+.container-page { width: 100%; max-width: 76rem; margin-inline: auto; padding-inline: var(--gutter); }
+
+/* ---------- Surfaces ---------- */
+.on-ink { background: var(--ink); color: var(--hanji); }
+.on-ink .muted { color: var(--mute); }
+.on-hanji { background: var(--hanji); color: var(--ink); }
+.on-hanji .muted { color: var(--mute-ink); }
+.on-flag { background: var(--flag); color: #fff; }
+
+/* ---------- Buttons: square, restrained radius ---------- */
+.btn {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  min-height: 3.1rem; padding: 0.7rem 1.4rem;
+  font-weight: 700; font-size: 1rem; line-height: 1.2; text-decoration: none;
+  border: 1.5px solid currentColor; border-radius: 2px;
+  transition: color 0.35s var(--ease), border-color 0.35s var(--ease);
+}
+/* Fill sweeps in from the left: the site's motion verb is "settle", things slide into place. */
+.btn::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  transform: scaleX(0); transform-origin: left; transition: transform 0.45s var(--ease);
+}
+.btn:hover::before, .btn:focus-visible::before { transform: scaleX(1); }
+.btn .arrow { transition: transform 0.35s var(--ease); }
+.btn:hover .arrow { transform: translateX(4px); }
+.btn:active { transform: translateY(1px); }
+
+.btn-primary { background: var(--flag); border-color: var(--flag); color: #fff; }
+.btn-primary::before { background: var(--hanji); }
+.btn-primary:hover, .btn-primary:focus-visible { color: var(--ink); border-color: var(--hanji); }
+.on-hanji .btn-primary::before { background: var(--ink); }
+.on-hanji .btn-primary:hover { color: var(--hanji); border-color: var(--ink); }
+.on-flag .btn-primary { background: var(--hanji); border-color: var(--hanji); color: var(--ink); }
+.on-flag .btn-primary::before { background: var(--ink); }
+.on-flag .btn-primary:hover { color: var(--hanji); border-color: var(--ink); }
+
+.btn-ghost { background: transparent; color: inherit; }
+.btn-ghost::before { background: currentColor; opacity: 0.12; }
+
+.link-line {
+  text-decoration: none; background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1.5px;
+  transition: background-size 0.4s var(--ease); padding-bottom: 2px;
+}
+.link-line:hover, .link-line:focus-visible { background-size: 100% 1.5px; }
+.prose-link { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+
+/* ---------- Nav ---------- */
+.site-header {
+  position: fixed; inset: 0 0 auto 0; z-index: 60; height: var(--nav-h);
+  color: var(--hanji);
+  transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease), backdrop-filter 0.4s;
+  border-bottom: 1px solid transparent;
+}
+.site-header .logo-dark { display: none; }
+html[data-hdr="red"] .site-header .btn-primary { background: var(--hanji); border-color: var(--hanji); color: var(--ink); }
+html[data-hdr="paper"] .site-header { color: var(--ink); }
+html[data-hdr="paper"] .site-header .logo-light { display: none; }
+html[data-hdr="paper"] .site-header .logo-dark { display: block; }
+html[data-hdr="paper"] .site-header .nav-link::after { background: var(--flag); }
+.site-header[data-solid="true"] {
+  background: rgba(11, 18, 32, 0.94); border-bottom-color: var(--line-ink);
+}
+.nav-link { position: relative; padding: 0.5rem 0.1rem; text-decoration: none; font-weight: 500; font-size: 0.97rem; }
+.nav-link::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0.1rem; height: 2px; background: var(--brass);
+  transform: scaleX(0); transform-origin: left; transition: transform 0.4s var(--ease);
+}
+.nav-link:hover::after, .nav-link[aria-current="page"]::after { transform: scaleX(1); }
+
+.menu-panel {
+  position: fixed; inset: 0; z-index: 70; background: var(--ink); color: var(--hanji);
+  display: flex; flex-direction: column; padding: 1.1rem var(--gutter) 2rem;
+  clip-path: inset(0 0 100% 0); visibility: hidden;
+  transition: clip-path 0.5s var(--ease), visibility 0s 0.5s;
+}
+.menu-panel[data-open="true"] { clip-path: inset(0); visibility: visible; transition: clip-path 0.5s var(--ease), visibility 0s; }
+
+/* ---------- Scroll story: ink moving through hanji ---------- */
+.story { position: relative; background: var(--ink); color: var(--hanji); --cur: 0; }
+.story-layer { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.story-layer-hud { z-index: 3; }
+.story-stage { position: sticky; top: 0; height: 100vh; height: 100svh; width: 100%; overflow: hidden; pointer-events: none; }
+.story-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity 0.6s ease; }
+.scene-on .story-canvas { opacity: 1; }
+
+.chapter { position: relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: flex-end; padding-top: var(--nav-h); padding-bottom: 4.5rem; overflow: hidden; }
+.chapter-inner { position: relative; z-index: 2; width: 100%; }
+.chapter-copy { max-width: 34rem; }
+.chapter-tag { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; color: var(--brass); margin: 0 0 1.2rem; }
+.hero-name { margin: 0 0 1.4rem; font-weight: 700; line-height: 1.35; }
+.hero-name small { display: block; font-weight: 500; font-size: 0.9em; opacity: 0.7; }
+.chapter-title { margin: 0 0 1.4rem; font-family: var(--font-text), sans-serif; font-weight: 700; font-size: clamp(2.2rem, min(5vw, 8.4vh), 4.6rem); line-height: 1.12; letter-spacing: -0.045em; }
+.hero .chapter-title { font-size: clamp(2.8rem, min(5.9vw, 11.5vh), 7rem); line-height: 1.02; letter-spacing: -0.055em; }
+.t-em { font-style: normal; font-family: var(--font-display), serif; font-weight: 900; letter-spacing: -0.04em; color: var(--brass); }
+.chapter-body { color: #d3d6df; font-size: 1.1rem; margin: 0 0 2rem; max-width: 29rem; }
+.hero .chapter-copy { max-width: 62rem; }
+.hero .chapter-body { max-width: 33rem; }
+
+/* Per-chapter surface themes (only when the shader paints the page) */
+.scene-on .chapter[data-theme="paper"] { color: var(--ink); }
+.scene-on .chapter[data-theme="paper"] .chapter-tag { color: var(--flag); }
+.scene-on .chapter[data-theme="paper"] .t-em { color: var(--flag); }
+.scene-on .chapter[data-theme="paper"] .chapter-body { color: #3a3a38; }
+.scene-on .chapter[data-theme="paper"] .btn-ghost { color: var(--ink); }
+.scene-on .chapter[data-theme="red"] { color: #fff; }
+.scene-on .chapter[data-theme="red"] .chapter-tag { color: rgba(255,255,255,0.85); }
+.scene-on .chapter[data-theme="red"] .t-em { color: var(--ink); }
+.scene-on .chapter[data-theme="red"] .chapter-body { color: rgba(255,255,255,0.92); }
+.scene-on .chapter[data-theme="red"] .btn-primary { background: var(--hanji); border-color: var(--hanji); color: var(--ink); }
+.scene-on .chapter[data-theme="red"] .btn-primary::before { background: var(--ink); }
+.scene-on .chapter[data-theme="red"] .btn-primary:hover { color: var(--hanji); border-color: var(--ink); }
+
+/* Static fallback glyphs, hidden once the shader runs */
+.chapter-glyph { position: absolute; right: var(--gutter); top: 50%; transform: translateY(-46%); font-family: var(--font-display), serif; font-weight: 900; line-height: 1; font-size: clamp(7rem, 22vw, 20rem); letter-spacing: -0.04em; color: transparent; -webkit-text-stroke: 1.5px rgba(243,237,224,0.35); user-select: none; }
+.scene-on .chapter-glyph { display: none; }
+
+.hero-hanja { position: absolute; z-index: 2; right: var(--gutter); top: calc(var(--nav-h) + 2rem); writing-mode: vertical-rl; font-family: var(--font-display), serif; font-weight: 700; letter-spacing: 0.35em; color: var(--brass); font-size: 1rem; margin: 0; }
+.scene-on .hero-hanja { color: var(--flag); }
+.hero-meta { position: absolute; z-index: 2; right: calc(var(--gutter) + 2.6rem); top: calc(var(--nav-h) + 2rem); margin: 0; text-align: right; font-size: 0.9rem; line-height: 1.5; opacity: 0.7; }
+
+/* Chapter visuals: typography doing the heavy lifting */
+.vis { position: absolute; z-index: 1; pointer-events: none; }
+.vis-words { right: 0; top: calc(var(--nav-h) + 1rem); width: 62%; display: grid; gap: 0; }
+.vw { display: block; font-family: var(--font-display), serif; font-weight: 900; line-height: 0.95; letter-spacing: -0.06em; font-size: clamp(9rem, 24vw, 24rem); white-space: nowrap; }
+.vw-a { color: var(--hanji); translate: calc((var(--cur) - 1) * -7vw) 0; }
+.vw-b { color: transparent; -webkit-text-stroke: 2px var(--hanji); translate: calc((var(--cur) - 1) * 9vw + 6vw) 0; }
+.vis-marquee { left: 0; right: 0; top: calc(var(--nav-h) + 1.5rem); display: grid; gap: 0.2rem; overflow: hidden; }
+.marquee { display: flex; white-space: pre; width: max-content; font-family: var(--font-display), serif; font-weight: 900; line-height: 1.02; letter-spacing: -0.04em; font-size: clamp(4rem, 8.6vw, 9rem); color: var(--ink); animation: marq 36s linear infinite; }
+.marquee-rev { animation-direction: reverse; animation-duration: 44s; }
+.marquee-outline { color: transparent; -webkit-text-stroke: 2px var(--ink); }
+.marquee span { display: block; }
+@keyframes marq { to { transform: translateX(-50%); } }
+.vis-shot { right: var(--gutter); top: 50%; width: min(52vw, 46rem); translate: 0 calc(-50% + (3 - var(--cur)) * -6vh); }
+.vis-shot-img { width: 100%; height: auto; filter: drop-shadow(0 30px 60px rgba(0,0,0,0.45)); }
+.vis-root { right: 3vw; top: 50%; transform: translateY(-52%); }
+.vis-root span { display: block; font-family: var(--font-display), serif; font-weight: 900; font-size: clamp(10rem, 27vw, 30rem); line-height: 0.9; letter-spacing: -0.07em; color: var(--ink); opacity: 0.92; translate: calc((4 - var(--cur)) * 10vw) 0; }
+
+.story-hud { }
+.chapter-rail { position: absolute; z-index: 3; right: var(--gutter); bottom: 2rem; display: flex; gap: 0.35rem; align-items: center; pointer-events: auto; mix-blend-mode: difference; color: #fff; }
+.rail-tick { width: 2.2rem; height: 2.75rem; display: grid; place-items: center; background: none; border: 0; cursor: pointer; padding: 0; }
+.rail-tick span { display: block; width: 100%; height: 3px; background: rgba(255,255,255,0.4); transition: background 0.4s, transform 0.4s var(--ease); transform-origin: left; }
+.rail-tick[aria-current="true"] span { background: #fff; transform: scaleY(1.7); }
+.rail-count { font-size: 0.85rem; margin-right: 0.8rem; font-variant-numeric: tabular-nums; }
+
+/* Reveals: opacity + short rise. No-JS and reduced motion keep everything visible. */
+.js .rv { opacity: 0; translate: 0 1.4rem; transition: opacity 0.7s var(--ease), translate 0.7s var(--ease); transition-delay: calc(var(--i, 0) * 70ms); }
+.js .rv.in, .js .chapter[data-active="true"] .rv { opacity: 1; translate: 0 0; }
+.js .chapter .rv { opacity: 0; translate: 0 1.4rem; }
+.js .chapter[data-active="true"] .rv { opacity: 1; translate: 0 0; }
+.js .rv-clip > * { clip-path: inset(0 0 100% 0); transition: clip-path 0.9s var(--ease); }
+.js .rv-clip.in > * { clip-path: inset(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .rv, .js .chapter .rv { opacity: 1 !important; translate: 0 0 !important; transition: none !important; }
+  .js .rv-clip > * { clip-path: none !important; transition: none; }
+  .btn::before, .btn, .nav-link::after, .menu-panel { transition: none; }
+  html { scroll-behavior: auto; }
+}
+
+@media (max-width: 47.99rem) {
+  :root { --nav-h: 3.75rem; }
+  .chapter { padding-bottom: 5.5rem; }
+  .chapter-title { font-size: 2.2rem; margin-bottom: 0.9rem; }
+  .hero .chapter-title { font-size: 2.9rem; }
+  .chapter-body { font-size: 1.02rem; margin-bottom: 1.4rem; }
+  .hero-hanja, .hero-meta { display: none; }
+  .chapter-glyph { top: 14%; transform: none; right: 50%; translate: 50% 0; font-size: 36vw; }
+  .chapter-rail { left: var(--gutter); right: auto; bottom: 1.2rem; }
+  .rail-tick { width: 2rem; }
+  .vis-words { width: 100%; top: calc(var(--nav-h) + 0.5rem); }
+  .vw { font-size: 30vw; }
+  .vis-marquee { top: calc(var(--nav-h) + 0.5rem); }
+  .marquee { font-size: 22vw; }
+  .vis-shot { width: 92vw; right: 4vw; top: calc(var(--nav-h) + 1.5rem); translate: 0 0; }
+  .vis-root { top: calc(var(--nav-h) + 1rem); transform: none; right: 0; }
+  .vis-root span { font-size: 52vw; }
+}
+
+/* Light-section helpers */
+.rule-list > li { border-top: 1px solid var(--line-hanji); }
+.rule-list > li:last-child { border-bottom: 1px solid var(--line-hanji); }
+.on-ink .rule-list > li { border-color: var(--line-ink); }
+.row-link { transition: padding-left 0.45s var(--ease), background-color 0.35s; }
+.row-link:hover { padding-left: 1rem; }
+
+.field { display: block; width: 100%; background: transparent; border: 0; border-bottom: 1.5px solid var(--line-hanji); padding: 0.7rem 0; font: inherit; color: inherit; border-radius: 0; }
+.field:focus { outline: none; border-bottom-color: var(--flag); box-shadow: 0 1.5px 0 var(--flag); }
+.field[aria-invalid="true"] { border-bottom-color: var(--flag); }
+
+/* ---------- Language toggle and per-language typography ---------- */
+.lang-toggle { display: inline-flex; align-items: center; gap: 0; font-size: 0.85rem; font-weight: 700; }
+.lang-toggle button { min-width: 2.2rem; height: 2.2rem; padding: 0 0.4rem; background: none; border: 0; border-bottom: 2px solid transparent; color: inherit; opacity: 0.72; cursor: pointer; font: inherit; font-size: 0.9rem; transition: opacity 0.3s, border-color 0.3s; }
+.lang-toggle button:hover { opacity: 1; }
+.lang-toggle button[aria-pressed="true"] { opacity: 1; border-bottom-color: var(--brass); }
+html[data-hdr="paper"] .lang-toggle button[aria-pressed="true"] { border-bottom-color: var(--flag); }
+
+/* Chinese: Simplified Chinese faces, normal line breaking (keep-all would never wrap hanzi) */
+html:lang(zh) { --font-display: var(--font-display-sc); --font-text: var(--font-text-sc); }
+html:lang(zh) body, html:lang(en) body { word-break: normal; }
+html:lang(zh) .chapter-title, html:lang(zh) .font-display { letter-spacing: -0.02em; }
+html:lang(zh) .chapter-title { line-height: 1.2; }
+/* English: longer words, so the big type steps down */
+html:lang(en) .chapter-title { font-size: clamp(2rem, min(4.2vw, 7.4vh), 4rem); letter-spacing: -0.035em; }
+html:lang(en) .hero .chapter-title { font-size: clamp(2.5rem, min(5vw, 10vh), 6rem); letter-spacing: -0.04em; }
+html:lang(en) .vw { font-size: clamp(5rem, 13vw, 14rem); letter-spacing: -0.04em; }
+html:lang(en) .vis-root span { font-size: clamp(6rem, 17vw, 18rem); letter-spacing: -0.04em; }
+html:lang(en) .marquee { letter-spacing: -0.02em; }
+@media (max-width: 47.99rem) {
+  html:lang(en) .chapter-title { font-size: 1.9rem; }
+  html:lang(en) .hero .chapter-title { font-size: 2.35rem; }
+  html:lang(en) .vw { font-size: 20vw; }
+  html:lang(en) .vis-root span { font-size: 30vw; }
+  html:lang(zh) .vw { font-size: 30vw; }
 }
