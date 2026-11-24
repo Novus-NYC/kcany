@@ -178,7 +178,7 @@ export async function createScene(opts: {
     gl.viewport(0, 0, canvas.width, canvas.height)
     gl.uniform2f(u.res, canvas.width, canvas.height)
     let gw: number, cx: number, cy: number
-    if (W < 768) { gw = W * 0.94; cx = 0.5; cy = 0.3 }
+    if (W < 768) { gw = Math.min(W * 0.82, H * 0.3); cx = 0.5; cy = 0.25 }
     else { gw = Math.min(W * 0.5, H * 1.2); cx = 0.73; cy = 0.5 }
     gl.uniform2f(u.glyphC, cx * W * dpr, (1 - cy) * H * dpr)
     gl.uniform2f(u.glyphS, gw * dpr, (gw / 2) * dpr)
